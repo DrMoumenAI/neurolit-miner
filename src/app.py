@@ -12,8 +12,9 @@ Then open: http://localhost:5000
 """
 
 import sys
-import os
-sys.path.insert(0, os.path.dirname(__file__))
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from flask import Flask, request, jsonify, render_template
 from pubmed_api  import search_pubmed, fetch_records
