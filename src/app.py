@@ -16,14 +16,22 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from flask import Flask, request, jsonify, render_template
-from pubmed_api  import search_pubmed, fetch_records
-from parser      import parse_xml
-from database    import (initialize_db, insert_articles, log_search,
-                         query_articles, get_stats,
-                         insert_trials, query_trials, get_trials_stats)
-from exporter    import export_to_csv
-from trials_api  import search_trials
+from flask import Flask, jsonify, render_template, request
+
+from database import (
+    get_stats,
+    get_trials_stats,
+    initialize_db,
+    insert_articles,
+    insert_trials,
+    log_search,
+    query_articles,
+    query_trials,
+)
+from exporter import export_to_csv
+from parser import parse_xml
+from pubmed_api import fetch_records, search_pubmed
+from trials_api import search_trials
 
 app = Flask(__name__, template_folder="../templates")
 

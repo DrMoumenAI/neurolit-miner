@@ -1,4 +1,4 @@
-# NeuroLit Miner
+﻿# NeuroLit Miner
 
 ![NeuroLit Miner screenshot](Screenshot.png)
 
@@ -139,3 +139,4 @@ If this tool contributes to a systematic review or meta-analysis, cite as:
 [Author]. NeuroLit Miner: Automated neurosurgical literature surveillance tool.
 GitHub, 2025. https://github.com/[username]/neurolit-miner
 ```
+
