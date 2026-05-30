@@ -131,7 +131,7 @@ python run_app.py
 - It is designed for local research workflow support, not production deployment.
 - It does not replace full systematic review screening, risk-of-bias assessment, or clinical judgment.
 - The Flask server uses development defaults and should not be exposed publicly without hardening.
-- MeSH-based filtering and cross-referencing between articles and trials tables are planned for V2.
+- Cross-referencing between articles and trials tables not yet implemented.
 
 ---
 
@@ -141,7 +141,7 @@ python run_app.py
 | --- | --- | --- |
 | V1 | ✅ Done | PubMed search, SQLite storage, CSV export, topic tagging |
 | V1.5 | ✅ Done | ClinicalTrials.gov module, MeSH extraction, web UI analytics |
-| V2 | 🔄 Planned | Publication trend analysis, topic co-occurrence, matplotlib figures |
+| V2 | ✅ Done | Publication trend, journal distribution, MeSH frequency, co-occurrence matrix |
 | V3 | 🔄 Planned | AI summarization layer, evidence grading scaffold |
 
 ---
@@ -159,7 +159,7 @@ Pre-residency researcher building computational tools for neurosurgical evidence
 If this tool contributes to a systematic review or meta-analysis, cite as:
 
 ```text
-[Author]. NeuroLit Miner: Automated neurosurgical literature surveillance tool.
-GitHub, 2025. https://github.com/[username]/neurolit-miner
+Moumen A. NeuroLit Miner: Automated neurosurgical literature surveillance tool.
+GitHub, 2026. https://github.com/DrMoumenAI/neurolit-miner
 ```
 
