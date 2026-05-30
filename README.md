@@ -2,6 +2,7 @@
 # NeuroLit Miner 🧠
 
 **Automated neurosurgical literature surveillance via PubMed E-utilities**
+![NeuroLit Miner UI](Screenshot.png)
 
 ---
 
