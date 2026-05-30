@@ -28,6 +28,20 @@ NeuroLit Miner automates the early surveillance workflow. It queries PubMed prog
 
 ---
 
+## Tech Stack
+
+| Library | Role |
+| --- | --- |
+| `requests` | HTTP calls to NCBI E-utilities and ClinicalTrials.gov API v2 |
+| `xml.etree` | PubMed XML parsing and MeSH extraction |
+| `sqlite3` | Local database — articles and trials tables |
+| `flask` | Local web server and REST API |
+| `csv` | Export snapshots |
+
+All dependencies are standard library or minimal. No deep learning frameworks required.
+
+---
+
 ## CLI Usage
 
 Install dependencies:
@@ -109,17 +123,18 @@ python run_app.py
 - It is designed for local research workflow support, not production deployment.
 - It does not replace full systematic review screening, risk-of-bias assessment, or clinical judgment.
 - The Flask server uses development defaults and should not be exposed publicly without hardening.
+- MeSH-based filtering and cross-referencing between articles and trials tables are planned for V2.
 
 ---
 
 ## Roadmap
 
-| Version | Features |
-| --- | --- |
-| V1 | PubMed search, SQLite storage, CSV export, topic tagging |
-| V1.5 | ClinicalTrials.gov module, MeSH extraction, web UI analytics |
-| V2 | Duplicate review workflow, batch queries, abstract keyword frequency |
-| V3 | AI summarization layer, evidence grading scaffold |
+| Version | Status | Features |
+| --- | --- | --- |
+| V1 | ✅ Done | PubMed search, SQLite storage, CSV export, topic tagging |
+| V1.5 | ✅ Done | ClinicalTrials.gov module, MeSH extraction, web UI analytics |
+| V2 | 🔄 Planned | Publication trend analysis, topic co-occurrence, matplotlib figures |
+| V3 | 🔄 Planned | AI summarization layer, evidence grading scaffold |
 
 ---
 
