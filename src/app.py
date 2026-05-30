@@ -25,7 +25,6 @@ from parser import parse_xml
 from database import initialize_db, insert_articles, log_search, query_articles, get_stats
 from exporter import export_to_csv
 from flask import send_from_directory
-import os
 
 
 # Configure Flask to find templates directory one level up (project root/templates)
