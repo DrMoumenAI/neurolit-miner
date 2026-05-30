@@ -116,6 +116,14 @@ python run_app.py
 
 ---
 
+## Sample Output — V2 Analytics
+
+**MeSH Co-occurrence Matrix** (n=19 articles, glioblastoma surgery query)
+
+![MeSH Co-occurrence](docs/mesh_cooccurrence.png)
+
+--- 
+
 ## Limitations
 
 - Topic tagging is keyword-based and approximate; it is intended as a navigation aid, not a validated classifier.
