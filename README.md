@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # NeuroLit Miner 🧠
 
 **Automated neurosurgical literature surveillance via PubMed E-utilities**
