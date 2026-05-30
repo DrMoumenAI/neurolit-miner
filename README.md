@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # NeuroLit Miner 🧠
 
 **Automated neurosurgical literature surveillance via PubMed E-utilities**
@@ -133,3 +134,7 @@ If this tool contributes to a systematic review or meta-analysis, cite as:
 [Author]. NeuroLit Miner: Automated neurosurgical literature surveillance tool. 
 GitHub, 2025. https://github.com/[username]/neurolit-miner
 ```
+=======
+# neurolit-miner
+Automated neurosurgical literature surveillance tool. Queries PubMed via NCBI E-utilities, classifies results by topic, stores in SQLite. Built with Python.
+>>>>>>> 7a9dc6e2d53e9053e122c26a625841e9c690c7e9
