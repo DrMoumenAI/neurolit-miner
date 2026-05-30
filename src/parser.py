@@ -35,7 +35,7 @@ from typing import Optional
 # Edit or extend this dict to customize your surveillance categories.
 
 TOPIC_KEYWORDS = {
-    "glioblastoma":         ["glioblastoma", "gbm", "glioma", "high-grade glioma", "astrocytoma"],
+    "glioblastoma":         ["glioblastoma", "glioma", "high-grade glioma", "astrocytoma"],
     "meningioma":           ["meningioma"],
     "spine":                ["spine", "spinal", "vertebral", "disc herniation", "spondylosis",
                              "myelopathy", "cord compression"],

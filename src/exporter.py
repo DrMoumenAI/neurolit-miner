@@ -44,7 +44,7 @@ def export_to_csv(articles: list[dict],
 
     # Standard fieldnames — maps to most reference managers
     fieldnames = ["pmid", "title", "authors", "journal", "year",
-                  "abstract", "topics", "doi", "url"]
+              "abstract", "topics", "mesh_terms", "doi", "url"]
 
     with open(filepath, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
