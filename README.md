@@ -118,6 +118,16 @@ Important notes (beginner-friendly)
 
 ---
 
+
+## Current Limitations
+
+- Topic tagging is keyword-based (no semantic understanding)
+- No MeSH term integration yet — planned for V2
+- PubMed query specificity depends on user-supplied terms
+- No deduplication across searches with different queries
+- No asynchronous requests (sequential batching only)
+- Local deployment only — no hosted version
+
 ## Author
 
 **Assia Moumen** — M.D., MEng 
