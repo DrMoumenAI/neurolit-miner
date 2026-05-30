@@ -1,6 +1,6 @@
 ﻿# NeuroLit Miner
 
-![NeuroLit Miner screenshot](Screenshot.png)
+![NeuroLit Miner V1.5](screenshotv1.5.png)
 
 **Automated neurosurgical literature surveillance via PubMed E-utilities**
 
