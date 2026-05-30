@@ -132,8 +132,8 @@ Pre-residency researcher building computational tools for neurosurgical evidence
 
 If this tool contributes to a systematic review or meta-analysis, cite as:
 ```
-[Author]. NeuroLit Miner: Automated neurosurgical literature surveillance tool. 
-GitHub, 2025. https://github.com/[username]/neurolit-miner
+Assia M Moumen NeuroLit Miner: Automated neurosurgical literature surveillance tool. 
+GitHub, 2025. https://github.com/DrMoumenAI/neurolit-miner
 ```
 =======
 # neurolit-miner
