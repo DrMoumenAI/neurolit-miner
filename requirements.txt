@@ -1,0 +1,6 @@
+# NeuroLit Miner — Dependencies
+# All other modules (xml.etree, sqlite3, csv, json, os, datetime, argparse)
+# are Python standard library — no installation needed.
+
+requests>=2.28.0      # HTTP calls to NCBI E-utilities and future APIs
+Flask>=2.0.0          # Simple web UI
