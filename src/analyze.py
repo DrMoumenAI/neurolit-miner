@@ -218,7 +218,7 @@ def analysis_trend(topic_filter=None, year_from=None, year_to=None,
     ax.set_ylabel("Articles (n)", fontsize=9)
     ax.tick_params(axis="x", rotation=45)
 
-    fig.text(0.99, 0.01, f"n={len(articles)} articles · {DB_PATH}",
+    fig.text(0.99, 0.01, f"n={len(articles)} articles · NeuroLit Miner",
              ha="right", va="bottom", fontsize=7, color=STYLE["dim"])
 
     _save(fig, "trend_by_year", suffix)
