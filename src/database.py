@@ -50,7 +50,8 @@ def initialize_db(db_path: str = DEFAULT_DB_PATH) -> None:
             journal     TEXT,
             year        TEXT,
             abstract    TEXT,
-            topics      TEXT,       -- pipe-separated topic tags
+            topics      TEXT,       -- pipe-separated keyword topic tags (approximate)
+            mesh_terms  TEXT,       -- pipe-separated NLM MeSH headings (authoritative)
             doi         TEXT,
             url         TEXT,
             date_added  TEXT        -- ISO timestamp when we stored it
@@ -72,6 +73,42 @@ def initialize_db(db_path: str = DEFAULT_DB_PATH) -> None:
     # Index on year and topics for fast filtering
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_year   ON articles(year)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_topics ON articles(topics)")
+    # V1.5 upgrade: add mesh_terms column to existing databases that were
+    # created before this column existed. ALTER TABLE ADD COLUMN is safe to
+    # run on a DB that already has the column — we catch the error silently.
+    try:
+        cursor.execute("ALTER TABLE articles ADD COLUMN mesh_terms TEXT DEFAULT ''")
+        print("[DB] Added mesh_terms column to existing database (V1 → V1.5 upgrade)")
+    except Exception:
+        pass  # Column already exists — normal on fresh databases
+
+    # Index must be created AFTER the column exists (migration above)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_mesh ON articles(mesh_terms)")
+
+    # ── V1.5: ClinicalTrials.gov trials table ────────────────────────────────
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS trials (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            nct_id           TEXT    UNIQUE NOT NULL,
+            title            TEXT,
+            status           TEXT,
+            phase            TEXT,
+            condition        TEXT,
+            intervention     TEXT,
+            sponsor          TEXT,
+            enrollment       TEXT,
+            start_date       TEXT,
+            completion_date  TEXT,
+            primary_outcome  TEXT,
+            countries        TEXT,
+            summary          TEXT,
+            url              TEXT,
+            search_condition TEXT,
+            date_added       TEXT
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_trial_status ON trials(status)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_trial_phase  ON trials(phase)")
 
     conn.commit()
     conn.close()
@@ -99,9 +136,9 @@ def insert_articles(articles: list[dict], db_path: str = DEFAULT_DB_PATH) -> int
         try:
             cursor.execute("""
                 INSERT OR IGNORE INTO articles
-                    (pmid, title, authors, journal, year, abstract, topics, doi, url, date_added)
+                    (pmid, title, authors, journal, year, abstract, topics, mesh_terms, doi, url, date_added)
                 VALUES
-                    (:pmid, :title, :authors, :journal, :year, :abstract, :topics, :doi, :url, :date_added)
+                    (:pmid, :title, :authors, :journal, :year, :abstract, :topics, :mesh_terms, :doi, :url, :date_added)
             """, {**article, "date_added": timestamp})
 
             if cursor.rowcount > 0:
@@ -174,7 +211,7 @@ def query_articles(topic: Optional[str] = None,
     where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor.execute(f"""
-        SELECT pmid, title, authors, journal, year, abstract, topics, doi, url
+        SELECT pmid, title, authors, journal, year, abstract, topics, mesh_terms, doi, url
         FROM articles
         {where_clause}
         ORDER BY CAST(year AS INTEGER) DESC
@@ -211,6 +248,188 @@ def get_stats(db_path: str = DEFAULT_DB_PATH) -> dict:
             topic_counts[t] = topic_counts.get(t, 0) + 1
     stats["topic_distribution"] = dict(sorted(topic_counts.items(),
                                                key=lambda x: x[1], reverse=True))
+
+    # MeSH term frequency — top 20 most common terms across all articles
+    cursor.execute("SELECT mesh_terms FROM articles WHERE mesh_terms != ''")
+    mesh_counts = {}
+    for row in cursor.fetchall():
+        for term in row["mesh_terms"].split("|"):
+            term = term.strip()
+            if term:
+                mesh_counts[term] = mesh_counts.get(term, 0) + 1
+    stats["top_mesh_terms"] = dict(
+        sorted(mesh_counts.items(), key=lambda x: x[1], reverse=True)[:20]
+    )
+    stats["total_mesh_indexed"] = sum(
+        1 for row in cursor.execute("SELECT mesh_terms FROM articles")
+        if row["mesh_terms"]
+    )
+
+    conn.close()
+    return stats
+
+
+# ── V1.5: Trials functions ────────────────────────────────────────────────────
+
+def insert_trials(trials: list[dict], search_condition: str = "",
+                  db_path: str = DEFAULT_DB_PATH) -> int:
+    """
+    Insert a list of trial dicts into the trials table.
+    Deduplicates by NCT ID using INSERT OR IGNORE.
+
+    Args:
+        trials:           list of dicts from trials_api.search_trials()
+        search_condition: the condition keyword used to find these trials
+                          (stored for provenance — reproducibility tracking)
+
+    Returns:
+        Number of new trials actually inserted
+    """
+    if not trials:
+        return 0
+
+    conn = get_connection(db_path)
+    cursor = conn.cursor()
+
+    # V1.5: add trials table if upgrading from V1 database
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS trials (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            nct_id           TEXT    UNIQUE NOT NULL,
+            title            TEXT,
+            status           TEXT,
+            phase            TEXT,
+            condition        TEXT,
+            intervention     TEXT,
+            sponsor          TEXT,
+            enrollment       TEXT,
+            start_date       TEXT,
+            completion_date  TEXT,
+            primary_outcome  TEXT,
+            countries        TEXT,
+            summary          TEXT,
+            url              TEXT,
+            search_condition TEXT,
+            date_added       TEXT
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_trial_status ON trials(status)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_trial_phase  ON trials(phase)")
+
+    timestamp = datetime.utcnow().isoformat()
+    inserted  = 0
+
+    for trial in trials:
+        try:
+            cursor.execute("""
+                INSERT OR IGNORE INTO trials (
+                    nct_id, title, status, phase, condition, intervention,
+                    sponsor, enrollment, start_date, completion_date,
+                    primary_outcome, countries, summary, url,
+                    search_condition, date_added
+                ) VALUES (
+                    :nct_id, :title, :status, :phase, :condition, :intervention,
+                    :sponsor, :enrollment, :start_date, :completion_date,
+                    :primary_outcome, :countries, :summary, :url,
+                    :search_condition, :date_added
+                )
+            """, {**trial,
+                  "search_condition": search_condition,
+                  "date_added":       timestamp})
+
+            if cursor.rowcount > 0:
+                inserted += 1
+
+        except sqlite3.Error as e:
+            print(f"[WARNING] DB insert error for {trial.get('nct_id','?')}: {e}")
+
+    conn.commit()
+    conn.close()
+
+    duplicates = len(trials) - inserted
+    print(f"[DB] Trials: inserted {inserted} new. ({duplicates} duplicates skipped)")
+    return inserted
+
+
+def query_trials(condition: Optional[str] = None,
+                 status: Optional[str] = None,
+                 phase: Optional[str] = None,
+                 keyword: Optional[str] = None,
+                 db_path: str = DEFAULT_DB_PATH) -> list[dict]:
+    """
+    Query stored trials with optional filters.
+
+    Args:
+        condition: filter by condition field (partial match)
+        status:    filter by recruitment status (partial match)
+        phase:     filter by trial phase (partial match)
+        keyword:   search title and summary for this term
+
+    Returns:
+        List of trial dicts ordered by start_date descending
+    """
+    conn = get_connection(db_path)
+    cursor = conn.cursor()
+
+    conditions_sql = []
+    params = []
+
+    if condition:
+        conditions_sql.append("(condition LIKE ? OR search_condition LIKE ?)")
+        params.extend([f"%{condition}%", f"%{condition}%"])
+
+    if status:
+        conditions_sql.append("status LIKE ?")
+        params.append(f"%{status}%")
+
+    if phase:
+        conditions_sql.append("phase LIKE ?")
+        params.append(f"%{phase}%")
+
+    if keyword:
+        conditions_sql.append("(title LIKE ? OR summary LIKE ? OR primary_outcome LIKE ?)")
+        params.extend([f"%{keyword}%", f"%{keyword}%", f"%{keyword}%"])
+
+    where_clause = "WHERE " + " AND ".join(conditions_sql) if conditions_sql else ""
+
+    cursor.execute(f"""
+        SELECT nct_id, title, status, phase, condition, intervention,
+               sponsor, enrollment, start_date, completion_date,
+               primary_outcome, countries, summary, url, search_condition
+        FROM trials
+        {where_clause}
+        ORDER BY start_date DESC
+    """, params)
+
+    rows = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    print(f"[DB] Trials query returned {len(rows)} records.")
+    return rows
+
+
+def get_trials_stats(db_path: str = DEFAULT_DB_PATH) -> dict:
+    """Return summary statistics for the trials table."""
+    conn = get_connection(db_path)
+    cursor = conn.cursor()
+
+    stats = {}
+
+    try:
+        cursor.execute("SELECT COUNT(*) FROM trials")
+        stats["total_trials"] = cursor.fetchone()[0]
+
+        cursor.execute("SELECT status, COUNT(*) as n FROM trials GROUP BY status ORDER BY n DESC")
+        stats["trials_by_status"] = {row["status"]: row["n"] for row in cursor.fetchall()}
+
+        cursor.execute("SELECT phase, COUNT(*) as n FROM trials GROUP BY phase ORDER BY n DESC")
+        stats["trials_by_phase"] = {row["phase"]: row["n"] for row in cursor.fetchall()}
+
+    except sqlite3.OperationalError:
+        # Trials table doesn't exist yet (V1 database)
+        stats["total_trials"] = 0
+        stats["trials_by_status"] = {}
+        stats["trials_by_phase"] = {}
 
     conn.close()
     return stats

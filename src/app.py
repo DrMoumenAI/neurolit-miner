@@ -1,170 +1,170 @@
 """
 app.py
 ------
-Simple Flask web UI for NeuroLit Miner.
+Flask web server for NeuroLit Miner V1.5.
+Serves the UI and connects it to the real PubMed + ClinicalTrials pipeline.
 
-Provides endpoints:
-  - GET  /             → serves the HTML UI
-  - POST /api/search   → runs PubMed search pipeline and returns JSON articles
-  - GET  /api/stats    → returns database statistics as JSON
-  - GET  /api/export   → exports filtered/current articles to CSV and returns file
+Run:
+    pip install flask
+    python src/app.py
 
-This file uses the existing backend modules in `src/` (pubmed_api, parser, database, exporter).
-Keep the implementation minimal and beginner-friendly.
+Then open: http://localhost:5000
 """
 
-import os
 import sys
-from flask import Flask, request, jsonify, render_template, send_file
-
-# Allow running from project root: python src/app.py
+import os
 sys.path.insert(0, os.path.dirname(__file__))
 
-from pubmed_api import search_pubmed, fetch_records
-from parser import parse_xml
-from database import initialize_db, insert_articles, log_search, query_articles, get_stats
-from exporter import export_to_csv
-from flask import send_from_directory
-import os
+from flask import Flask, request, jsonify, render_template
+from pubmed_api  import search_pubmed, fetch_records
+from parser      import parse_xml
+from database    import (initialize_db, insert_articles, log_search,
+                         query_articles, get_stats,
+                         insert_trials, query_trials, get_trials_stats)
+from exporter    import export_to_csv
+from trials_api  import search_trials
+
+app = Flask(__name__, template_folder="../templates")
+
+# Initialize DB on startup (creates all tables including trials)
+initialize_db()
 
 
-# Configure Flask to find templates directory one level up (project root/templates)
-TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "..", "templates")
-app = Flask(__name__, template_folder=TEMPLATES_DIR)
-
+# ── PubMed routes ─────────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
-    """Render the main UI page.
-
-    The UI (templates/index.html) calls the API endpoints below.
-    """
-    # Ensure DB is initialized before the first use
-    initialize_db()
+    """Serve the main UI."""
     return render_template("index.html")
 
 
 @app.route("/api/search", methods=["POST"])
 def api_search():
-    """Run a PubMed search and return parsed articles as JSON.
-
-    Expected JSON body: {"query": str, "max_results": int, "year_from": int|None, "year_to": int|None}
-    Pipeline:
-      1. search_pubmed()
-      2. fetch_records()
-      3. parse_xml()
-      4. insert_articles()
-      5. log_search()
     """
-    data = request.get_json(force=True) or {}
-    query = data.get("query", "").strip()
-    max_results = int(data.get("max_results") or 50)
-    year_from = data.get("year_from") or None
-    year_to = data.get("year_to") or None
+    Run a real PubMed search and return results as JSON.
+    Expects JSON body: { query, max, year_from, year_to }
+    """
+    data      = request.get_json()
+    query     = data.get("query", "").strip()
+    max_res   = int(data.get("max", 20))
+    year_from = int(data["year_from"]) if data.get("year_from") else None
+    year_to   = int(data["year_to"])   if data.get("year_to")   else None
 
     if not query:
-        return jsonify({"error": "query is required"}), 400
+        return jsonify({"error": "Query cannot be empty."}), 400
 
-    initialize_db()
+    max_res = min(max_res, 50)
 
-    # 1. Search PubMed for PMIDs
-    pmids = search_pubmed(query=query, max_results=max_results,
-                         year_from=year_from, year_to=year_to)
+    try:
+        pmids    = search_pubmed(query, max_results=max_res,
+                                 year_from=year_from, year_to=year_to)
+        if not pmids:
+            return jsonify({"articles": [], "inserted": 0,
+                            "message": "No results found. Try a different query."})
 
-    if not pmids:
-        # Return empty list so frontend can handle gracefully
-        log_search(query, max_results, year_from, year_to, 0)
-        return jsonify([])
+        xml_data = fetch_records(pmids)
+        articles = parse_xml(xml_data)
+        inserted = insert_articles(articles)
+        log_search(query, max_res, year_from, year_to, inserted)
 
-    # 2. Fetch full XML
-    xml_data = fetch_records(pmids)
+        return jsonify({
+            "articles": articles,
+            "inserted": inserted,
+            "total":    len(articles),
+            "message":  f"Retrieved {len(articles)} articles · {inserted} new stored."
+        })
 
-    # 3. Parse XML
-    articles = parse_xml(xml_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    # 4. Insert into DB (deduplicates)
-    inserted = insert_articles(articles)
-    duplicates = max(0, len(articles) - inserted)
 
-    # 5. Log search
-    log_search(query, max_results, year_from, year_to, inserted)
+@app.route("/api/db/search", methods=["GET"])
+def api_db_search():
+    """Search already-stored articles in SQLite."""
+    topic     = request.args.get("topic")
+    keyword   = request.args.get("keyword")
+    year_from = int(request.args["year_from"]) if request.args.get("year_from") else None
+    year_to   = int(request.args["year_to"])   if request.args.get("year_to")   else None
 
-    # Total articles now in DB
-    stats = get_stats()
-    total_articles = stats.get("total_articles", 0)
-
-    # Return structured response for frontend clarity
-    return jsonify({
-        "articles": articles,
-        "retrieved": len(articles),
-        "inserted": inserted,
-        "duplicates": duplicates,
-        "total_articles": total_articles,
-    })
+    articles = query_articles(topic=topic, keyword=keyword,
+                              year_from=year_from, year_to=year_to)
+    return jsonify({"articles": articles, "total": len(articles)})
 
 
 @app.route("/api/stats", methods=["GET"])
 def api_stats():
-    """Return simple DB statistics as JSON."""
-    initialize_db()
-    stats = get_stats()
-    return jsonify(stats)
+    """Return database statistics."""
+    return jsonify(get_stats())
 
 
-@app.route("/api/export", methods=["GET"])
+@app.route("/api/export", methods=["POST"])
 def api_export():
-    """Export stored or filtered articles to CSV and return file.
+    """Export current results to CSV."""
+    data     = request.get_json()
+    articles = data.get("articles", [])
+    if not articles:
+        return jsonify({"error": "No articles to export."}), 400
+    filepath = export_to_csv(articles)
+    return jsonify({"path": filepath, "count": len(articles)})
 
-    Optional query params: topic, year_from, year_to, keyword
-    If no articles found, returns 400 with a JSON error.
+
+# ── ClinicalTrials.gov routes ─────────────────────────────────────────────────
+
+@app.route("/api/trials/search", methods=["POST"])
+def api_trials_search():
     """
-    topic = request.args.get("topic") or None
-    year_from = request.args.get("year_from") or None
-    year_to = request.args.get("year_to") or None
-    keyword = request.args.get("keyword") or None
+    Search ClinicalTrials.gov and store results.
+    Expects JSON: { condition, intervention, status, max }
+    """
+    data         = request.get_json()
+    condition    = data.get("condition", "").strip()
+    intervention = (data.get("intervention") or "").strip() or None
+    status       = (data.get("status") or "").strip()       or None
+    max_results  = int(data.get("max", 20))
 
-    initialize_db()
-    # If no filters provided, export all stored articles
-    results = query_articles(topic=topic,
-                             year_from=int(year_from) if year_from else None,
-                             year_to=int(year_to) if year_to else None,
-                             keyword=keyword)
+    if not condition:
+        return jsonify({"error": "Condition cannot be empty."}), 400
 
-    if not results:
-        return jsonify({"error": "no articles to export"}), 400
+    try:
+        trials   = search_trials(condition, intervention=intervention,
+                                 status=status, max_results=max_results)
+        inserted = insert_trials(trials, search_condition=condition)
 
-    filepath = export_to_csv(results)
-    if not filepath:
-        return jsonify({"error": "export failed"}), 500
-
-    # If caller requested an AJAX/json response, return metadata so frontend
-    # can show a message and then trigger the download separately.
-    if request.args.get("ajax") in ("1", "true", "yes"):
         return jsonify({
-            "message": "CSV exported from current SQLite database snapshot.",
-            "filename": os.path.basename(filepath),
-            "filepath": filepath,
+            "trials":   trials,
+            "inserted": inserted,
+            "total":    len(trials),
+            "message":  f"Retrieved {len(trials)} trials · {inserted} new stored."
         })
 
-    # Default behavior: send file for download
-    return send_file(filepath, as_attachment=True)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/trials/db", methods=["GET"])
+def api_trials_db():
+    """Query stored trials from SQLite."""
+    condition = request.args.get("condition")
+    status    = request.args.get("status")
+    phase     = request.args.get("phase")
+    keyword   = request.args.get("keyword")
 
-@app.route('/api/export/download', methods=['GET'])
-def api_export_download():
-    """Download a previously-created CSV file by filename.
+    trials = query_trials(condition=condition, status=status,
+                          phase=phase, keyword=keyword)
+    return jsonify({"trials": trials, "total": len(trials)})
 
-    Query param: file=<filename.csv>
-    """
-    filename = request.args.get('file')
-    if not filename:
-        return jsonify({"error": "file parameter required"}), 400
 
-    results_dir = os.path.join(os.path.dirname(__file__), '..', 'results')
-    return send_from_directory(results_dir, filename, as_attachment=True)
+@app.route("/api/trials/stats", methods=["GET"])
+def api_trials_stats():
+    """Return trials table statistics."""
+    return jsonify(get_trials_stats())
 
+
+# ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    # Run development server: python src/app.py
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    print("\n" + "═"*50)
+    print("  NeuroLit Miner — Web Interface")
+    print("  Open: http://localhost:5000")
+    print("═"*50 + "\n")
+    app.run(debug=True, port=5000)

@@ -6,9 +6,196 @@
 <title>NeuroLit Miner</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
-/* (styles identical to original UI for brevity) */
-  :root { --bg:#080b0f; --surface:#0d1117; --surface2:#131920; --border:#1e2a35; --accent:#00c9a7; --accent2:#0084ff; --warn:#ff6b6b; --text:#c9d8e8; --text-dim:#5a7a94; --text-bright:#e8f4ff; --mono:'DM Mono', monospace; --serif:'Cormorant Garamond', Georgia, serif; }
-  *{margin:0;padding:0;box-sizing:border-box} body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;min-height:100vh;overflow-x:hidden} body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,201,167,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(0,201,167,0.03) 1px, transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}.container{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:40px 24px} header{margin-bottom:40px;border-bottom:1px solid var(--border);padding-bottom:28px}.logo-row{display:flex;align-items:baseline;gap:16px;margin-bottom:8px}.logo{font-family:var(--serif);font-size:32px;font-weight:300;font-style:italic;color:var(--text-bright);letter-spacing:-0.5px}.logo span{color:var(--accent);font-style:normal;font-weight:600}.version-badge{font-size:10px;color:var(--accent);border:1px solid var(--accent);padding:2px 7px;border-radius:2px;letter-spacing:1px;opacity:0.7}.tagline{color:var(--text-dim);font-size:12px;letter-spacing:0.3px} .search-panel{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:24px;margin-bottom:24px}.panel-label{font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:16px;text-transform:uppercase}.search-row{display:flex;gap:10px;margin-bottom:14px} input[type="text"],input[type="number"],select{background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text-bright);font-family:var(--mono);font-size:13px;padding:9px 13px;outline:none;transition:border-color 0.15s} input[type="text"]:focus,input[type="number"]:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,201,167,0.08)} input[type="text"]{flex:1} input[type="number"]{width:88px} .filters-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.filter-group{display:flex;align-items:center;gap:7px}.filter-label{color:var(--text-dim);font-size:11px;white-space:nowrap} select{cursor:pointer} select option{background:var(--surface2)} .btn{font-family:var(--mono);font-size:12px;letter-spacing:1px;padding:9px 20px;border-radius:3px;border:none;cursor:pointer;transition:all 0.15s;text-transform:uppercase}.btn-primary{background:var(--accent);color:#000;font-weight:500}.btn-primary:hover{background:#00e0bc;transform:translateY(-1px)}.btn-primary:active{transform:translateY(0)}.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none}.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--text-dim);color:var(--text)} .quick-label{font-size:10px;color:var(--text-dim);margin-right:8px;letter-spacing:1px;text-transform:uppercase} .chip{display:inline-block;padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;font-size:11px;color:var(--text-dim);cursor:pointer;transition:all 0.12s;margin:3px} .chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,201,167,0.05)} .status-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;margin-bottom:20px;font-size:11px;color:var(--text-dim);min-height:38px}.dot{width:7px;height:7px;border-radius:50%;background:var(--text-dim);flex-shrink:0}.dot.active{background:var(--accent);animation:pulse 1.2s infinite}.dot.error{background:var(--warn)}.dot.done{background:var(--accent)}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}} .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.results-count{font-size:11px;color:var(--text-dim)}.results-count strong{color:var(--accent);font-weight:500}.article-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:18px 20px;margin-bottom:10px;transition:border-color 0.15s;animation:fadeIn 0.2s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}.article-card:hover{border-color:#2a3f52}.article-title{font-family:var(--serif);font-size:16px;font-weight:400;color:var(--text-bright);line-height:1.4;margin-bottom:7px}.article-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;color:var(--text-dim)}.meta-item{display:flex;align-items:center;gap:4px}.topic-tag{display:inline-block;padding:2px 8px;border-radius:2px;font-size:10px;letter-spacing:0.5px;margin:2px;border:1px solid}.tag-AI_ML{color:#7dd3fc;border-color:rgba(125,211,252,0.3);background:rgba(125,211,252,0.06)}.tag-glioblastoma{color:#f9a8d4;border-color:rgba(249,168,212,0.3);background:rgba(249,168,212,0.06)}.tag-spine{color:#86efac;border-color:rgba(134,239,172,0.3);background:rgba(134,239,172,0.06)}.tag-vascular{color:#fca5a5;border-color:rgba(252,165,165,0.3);background:rgba(252,165,165,0.06)}.tag-outcomes_research{color:#fcd34d;border-color:rgba(252,211,77,0.3);background:rgba(252,211,77,0.06)}.tag-global_neurosurgery{color:#a78bfa;border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06)}.tag-radiosurgery{color:#fb923c;border-color:rgba(251,146,60,0.3);background:rgba(251,146,60,0.06)}.tag-intraoperative_tech{color:#34d399;border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.06)}.tag-epilepsy_surgery{color:#e879f9;border-color:rgba(232,121,249,0.3);background:rgba(232,121,249,0.06)}.tag-pediatric{color:#67e8f9;border-color:rgba(103,232,249,0.3);background:rgba(103,232,249,0.06)}.tag-trauma{color:#fbbf24;border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06)}.tag-meningioma{color:#c4b5fd;border-color:rgba(196,181,253,0.3);background:rgba(196,181,253,0.06)}.tag-uncategorized{color:var(--text-dim);border-color:var(--border)}.abstract-text{font-size:12px;color:var(--text-dim);line-height:1.6;display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}.abstract-text.open{display:block}.toggle-abstract{font-size:10px;color:var(--accent);cursor:pointer;background:none;border:none;font-family:var(--mono);letter-spacing:0.5px;padding:0;margin-top:6px}.toggle-abstract:hover{text-decoration:underline}.pmid-link{color:var(--accent2);text-decoration:none;font-size:11px}.pmid-link:hover{text-decoration:underline}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;text-align:center}.stat-number{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--accent);display:block;line-height:1;margin-bottom:5px}.stat-label{font-size:10px;color:var(--text-dim);letter-spacing:1px}.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}.empty-glyph{font-family:var(--serif);font-size:48px;font-style:italic;opacity:0.15;display:block;margin-bottom:16px;color:var(--accent)}.empty-state p{font-size:12px;line-height:1.7}.skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:3px;height:12px;margin-bottom:8px}@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}.skeleton-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:18px 20px;margin-bottom:10px} footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text-dim);letter-spacing:0.5px}.footer-left{font-family:var(--serif);font-style:italic;font-size:12px} ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  :root {
+    --bg:       #080b0f;
+    --surface:  #0d1117;
+    --surface2: #131920;
+    --border:   #1e2a35;
+    --accent:   #00c9a7;
+    --accent2:  #0084ff;
+    --warn:     #ff6b6b;
+    --text:     #c9d8e8;
+    --dim:      #5a7a94;
+    --bright:   #e8f4ff;
+    --mono:     'DM Mono', monospace;
+    --serif:    'Cormorant Garamond', Georgia, serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,201,167,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,201,167,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none; z-index:0;
+  }
+
+  .container { position:relative; z-index:1; max-width:980px; margin:0 auto; padding:36px 24px; }
+
+  /* ── Header ── */
+  header { margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:24px; }
+  .logo-row { display:flex; align-items:baseline; gap:14px; margin-bottom:6px; }
+  .logo { font-family:var(--serif); font-size:30px; font-weight:300; font-style:italic; color:var(--bright); }
+  .logo span { color:var(--accent); font-style:normal; font-weight:600; }
+  .badge { font-size:10px; color:var(--accent); border:1px solid var(--accent); padding:2px 7px; border-radius:2px; letter-spacing:1px; opacity:.7; }
+  .tagline { color:var(--dim); font-size:11px; letter-spacing:.3px; }
+
+  /* ── Tabs ── */
+  .tabs { display:flex; gap:0; margin-bottom:24px; border-bottom:1px solid var(--border); }
+  .tab {
+    padding:9px 20px; font-family:var(--mono); font-size:11px; letter-spacing:1px;
+    text-transform:uppercase; cursor:pointer; color:var(--dim);
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+    background:none; border-top:none; border-left:none; border-right:none;
+    transition:all .15s;
+  }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* ── Stats grid ── */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:24px; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:14px; text-align:center; }
+  .stat-n { font-family:var(--serif); font-size:26px; font-weight:300; color:var(--accent); display:block; line-height:1; margin-bottom:4px; }
+  .stat-l { font-size:10px; color:var(--dim); letter-spacing:1px; text-transform:uppercase; }
+
+  /* ── Search panel ── */
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:22px; margin-bottom:18px; }
+  .panel-label { font-size:10px; letter-spacing:2px; color:var(--accent); margin-bottom:14px; text-transform:uppercase; }
+
+  .search-row { display:flex; gap:10px; margin-bottom:12px; }
+  input[type=text], input[type=number], select {
+    background:var(--bg); border:1px solid var(--border); border-radius:3px;
+    color:var(--bright); font-family:var(--mono); font-size:13px; padding:9px 13px; outline:none;
+    transition:border-color .15s;
+  }
+  input[type=text]:focus, input[type=number]:focus { border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,201,167,.08); }
+  input[type=text] { flex:1; }
+  input[type=number] { width:82px; }
+
+  .filters { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+  .fl { color:var(--dim); font-size:11px; white-space:nowrap; }
+
+  .chips { margin-top:4px; }
+  .chip-label { font-size:10px; color:var(--dim); margin-right:6px; letter-spacing:1px; text-transform:uppercase; }
+  .chip {
+    display:inline-block; padding:3px 9px;
+    background:var(--surface2); border:1px solid var(--border); border-radius:2px;
+    font-size:11px; color:var(--dim); cursor:pointer; transition:all .12s; margin:2px;
+  }
+  .chip:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,201,167,.05); }
+
+  /* ── Buttons ── */
+  .btn { font-family:var(--mono); font-size:11px; letter-spacing:1px; padding:9px 18px; border-radius:3px; border:none; cursor:pointer; transition:all .15s; text-transform:uppercase; }
+  .btn-primary { background:var(--accent); color:#000; font-weight:500; }
+  .btn-primary:hover { background:#00e0bc; transform:translateY(-1px); }
+  .btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+  .btn-ghost { background:transparent; color:var(--dim); border:1px solid var(--border); }
+  .btn-ghost:hover { border-color:var(--dim); color:var(--text); }
+  .btn-sm { padding:5px 12px; font-size:10px; }
+
+  /* ── Status bar ── */
+  .status-bar {
+    display:flex; align-items:center; gap:10px; padding:9px 14px;
+    background:var(--surface2); border:1px solid var(--border); border-radius:3px;
+    margin-bottom:18px; font-size:11px; color:var(--dim); min-height:36px;
+  }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--dim); flex-shrink:0; }
+  .dot.active { background:var(--accent); animation:pulse 1.2s infinite; }
+  .dot.error  { background:var(--warn); }
+  .dot.done   { background:var(--accent); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── Results ── */
+  .results-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .results-count { font-size:11px; color:var(--dim); }
+  .results-count strong { color:var(--accent); font-weight:500; }
+
+  .article-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:4px;
+    padding:16px 20px; margin-bottom:9px; transition:border-color .15s;
+    animation:fadeIn .2s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+  .article-card:hover { border-color:#2a3f52; }
+
+  .article-title { font-family:var(--serif); font-size:16px; font-weight:400; color:var(--bright); line-height:1.4; margin-bottom:6px; }
+  .article-meta { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px; font-size:11px; color:var(--dim); }
+  .pmid-link { color:var(--accent2); text-decoration:none; font-size:11px; }
+  .pmid-link:hover { text-decoration:underline; }
+
+  .topic-tag { display:inline-block; padding:2px 7px; border-radius:2px; font-size:10px; letter-spacing:.5px; margin:2px; border:1px solid; }
+  .tag-AI_ML           { color:#7dd3fc; border-color:rgba(125,211,252,.3); background:rgba(125,211,252,.06); }
+  .tag-glioblastoma    { color:#f9a8d4; border-color:rgba(249,168,212,.3); background:rgba(249,168,212,.06); }
+  .tag-spine           { color:#86efac; border-color:rgba(134,239,172,.3); background:rgba(134,239,172,.06); }
+  .tag-vascular        { color:#fca5a5; border-color:rgba(252,165,165,.3); background:rgba(252,165,165,.06); }
+  .tag-outcomes_research { color:#fcd34d; border-color:rgba(252,211,77,.3); background:rgba(252,211,77,.06); }
+  .tag-global_neurosurgery { color:#a78bfa; border-color:rgba(167,139,250,.3); background:rgba(167,139,250,.06); }
+  .tag-radiosurgery    { color:#fb923c; border-color:rgba(251,146,60,.3); background:rgba(251,146,60,.06); }
+  .tag-intraoperative_tech { color:#34d399; border-color:rgba(52,211,153,.3); background:rgba(52,211,153,.06); }
+  .tag-epilepsy_surgery { color:#e879f9; border-color:rgba(232,121,249,.3); background:rgba(232,121,249,.06); }
+  .tag-pediatric       { color:#67e8f9; border-color:rgba(103,232,249,.3); background:rgba(103,232,249,.06); }
+  .tag-trauma          { color:#fbbf24; border-color:rgba(251,191,36,.3); background:rgba(251,191,36,.06); }
+  .tag-meningioma      { color:#c4b5fd; border-color:rgba(196,181,253,.3); background:rgba(196,181,253,.06); }
+  .tag-uncategorized   { color:var(--dim); border-color:var(--border); }
+
+  .toggle-abstract { font-size:10px; color:var(--accent); cursor:pointer; background:none; border:none; font-family:var(--mono); padding:0; margin-top:5px; }
+  .toggle-abstract:hover { text-decoration:underline; }
+  .abstract-text { font-size:12px; color:var(--dim); line-height:1.65; display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+  .abstract-text.open { display:block; }
+
+  /* ── DB search panel ── */
+  .db-filters { display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; }
+  .db-filters select { width:100%; }
+  .field-label { display:block; font-size:10px; color:var(--dim); letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; }
+
+  /* ── Skeleton loading ── */
+  .skeleton { background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:3px; height:12px; margin-bottom:8px; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .skeleton-card { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:16px 20px; margin-bottom:9px; }
+
+  /* ── Empty state ── */
+  .empty { text-align:center; padding:50px 20px; color:var(--dim); }
+  .empty-glyph { font-family:var(--serif); font-size:44px; font-style:italic; opacity:.12; display:block; margin-bottom:14px; color:var(--accent); }
+  .empty p { font-size:12px; line-height:1.7; }
+
+  /* ── Topic chart ── */
+  .chart-bar { display:flex; align-items:center; gap:10px; margin-bottom:7px; font-size:11px; }
+  .chart-bar-label { width:180px; color:var(--text); text-align:right; flex-shrink:0; }
+  .chart-bar-track { flex:1; background:var(--surface2); border-radius:2px; height:14px; overflow:hidden; }
+  .chart-bar-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .6s ease; opacity:.7; }
+  .chart-bar-n { color:var(--dim); min-width:28px; }
+
+  /* ── Footer ── */
+  footer { margin-top:48px; padding-top:18px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--dim); }
+  .footer-left { font-family:var(--serif); font-style:italic; font-size:12px; }
+
+
+  /* ── MeSH tags ── */
+  .mesh-tag {
+    display:inline-block; padding:2px 7px; border-radius:2px;
+    font-size:10px; letter-spacing:.3px; margin:2px;
+    background: rgba(251,191,36,.06);
+    border: 1px solid rgba(251,191,36,.25);
+    color: #fbbf24;
+  }
+  .mesh-section { margin-top:6px; }
+  .mesh-label { font-size:10px; color:var(--dim); letter-spacing:1px; text-transform:uppercase; margin-right:4px; }
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 </style>
 </head>
 <body>
@@ -17,273 +204,590 @@
   <header>
     <div class="logo-row">
       <div class="logo">Neuro<span>Lit</span> Miner</div>
-      <span class="version-badge">V1.0</span>
+      <span class="badge">V1.5</span>
     </div>
-    <div class="tagline">Automated neurosurgical literature surveillance · NCBI E-utilities · PubMed</div>
+    <div class="tagline">Automated neurosurgical literature surveillance · NCBI E-utilities · Real PubMed data</div>
   </header>
 
-  <!-- Stats bar -->
-  <div class="stats-grid" id="statsGrid">
-    <div class="stat-card">
-      <span class="stat-number" id="statTotal">0</span>
-      <span class="stat-label">Articles stored</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-number" id="statSearches">0</span>
-      <span class="stat-label">Searches run</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-number" id="statTopics">12</span>
-      <span class="stat-label">Topic categories</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-number" id="statSession">0</span>
-      <span class="stat-label">This session</span>
-    </div>
+  <!-- Stats -->
+  <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+    <div class="stat-card"><span class="stat-n" id="sTotal">—</span><span class="stat-l">Stored articles</span></div>
+    <div class="stat-card"><span class="stat-n" id="sTrials">—</span><span class="stat-l">Stored trials</span></div>
+    <div class="stat-card"><span class="stat-n" id="sSearches">—</span><span class="stat-l">Searches run</span></div>
+    <div class="stat-card"><span class="stat-n" id="sTopics">12</span><span class="stat-l">Topic categories</span></div>
+    <div class="stat-card"><span class="stat-n" id="sSession">0</span><span class="stat-l">This session</span></div>
   </div>
 
-  <!-- Search panel -->
-  <div class="search-panel">
-    <div class="panel-label">// PubMed Query</div>
-    <div class="search-row">
-      <input type="text" id="queryInput"
-             placeholder='e.g. "glioblastoma machine learning" OR "AI neurosurgery"'
-             value="glioblastoma machine learning" />
-      <button class="btn btn-primary" id="searchBtn" onclick="runSearch()">Search</button>
-    </div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('search')">// PubMed Search</button>
+    <button class="tab" onclick="switchTab('database')">// Local Database</button>
+    <button class="tab" onclick="switchTab('analytics')">// Analytics</button>
+    <button class="tab" onclick="switchTab('trials')">// Clinical Trials</button>
+  </div>
 
-    <div class="filters-row">
-      <div class="filter-group">
-        <span class="filter-label">Max results:</span>
-        <input type="number" id="maxResults" value="8" min="1" max="50" />
+  <!-- ── TAB: PubMed Search ── -->
+  <div class="tab-panel active" id="tab-search">
+    <div class="panel">
+      <div class="panel-label">// Live PubMed Query via NCBI E-utilities</div>
+      <div class="search-row">
+        <input type="text" id="queryInput" placeholder='e.g. "glioblastoma machine learning"' value="glioblastoma machine learning" />
+        <button class="btn btn-primary" id="searchBtn" onclick="runSearch()">Search PubMed</button>
       </div>
-      <div class="filter-group">
-        <span class="filter-label">Year from:</span>
-        <input type="number" id="yearFrom" placeholder="2019" min="1900" max="2050" style="width:80px" />
+      <div class="filters">
+        <span class="fl">Max:</span>
+        <input type="number" id="maxResults" value="10" min="1" max="50" />
+        <span class="fl">Year from:</span>
+        <input type="number" id="yearFrom" placeholder="2019" min="1990" max="2025" style="width:78px" />
+        <span class="fl">to:</span>
+        <input type="number" id="yearTo" placeholder="2025" min="1990" max="2025" style="width:78px" />
       </div>
-      <div class="filter-group">
-        <span class="filter-label">Year to:</span>
-        <input type="number" id="yearTo" placeholder="2025" min="1900" max="2050" style="width:80px" />
+      <div class="chips">
+        <span class="chip-label">Quick:</span>
+        <span class="chip" onclick="setQ('glioblastoma machine learning')">GBM + AI</span>
+        <span class="chip" onclick="setQ('intraoperative artificial intelligence neurosurgery')">Intraoperative AI</span>
+        <span class="chip" onclick="setQ('brain tumor segmentation deep learning')">Tumor segmentation</span>
+        <span class="chip" onclick="setQ('global neurosurgery workforce')">Global neurosurgery</span>
+        <span class="chip" onclick="setQ('awake craniotomy motor cortex outcomes')">Awake craniotomy</span>
+        <span class="chip" onclick="setQ('spinal surgery robotic outcomes')">Robotic spine</span>
+        <span class="chip" onclick="setQ('meningioma recurrence surgery')">Meningioma</span>
       </div>
     </div>
 
-    <div style="margin-top: 14px;">
-      <span class="quick-label">Quick:</span>
-      <span class="chip" onclick="setQuery('glioblastoma machine learning')">GBM + AI</span>
-      <span class="chip" onclick="setQuery('intraoperative artificial intelligence neurosurgery')">Intraoperative AI</span>
-      <span class="chip" onclick="setQuery('brain tumor segmentation deep learning')">Tumor segmentation</span>
-      <span class="chip" onclick="setQuery('global neurosurgery workforce low income countries')">Global neurosurgery</span>
-      <span class="chip" onclick="setQuery('awake craniotomy motor cortex glioma outcomes')">Awake craniotomy</span>
-      <span class="chip" onclick="setQuery('spinal surgery robotic outcomes')">Robotic spine</span>
-      <span class="chip" onclick="setQuery('meningioma recurrence outcomes surgery')">Meningioma</span>
+    <div class="status-bar">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">Ready. Results are fetched live from PubMed and stored in your local SQLite database.</span>
+    </div>
+
+    <div id="searchResults">
+      <div class="empty">
+        <span class="empty-glyph">∂</span>
+        <p>Results will appear here.<br>Each search is logged and stored locally — no duplicates.</p>
+      </div>
     </div>
   </div>
 
-  <!-- Status bar -->
-  <div class="status-bar" id="statusBar">
-    <div class="dot" id="statusDot"></div>
-    <span id="statusText">Ready. Enter a query and press Search.</span>
-  </div>
+  <!-- ── TAB: Local Database ── -->
+  <div class="tab-panel" id="tab-database">
+    <div class="panel">
+      <div class="panel-label">// Query Stored Articles (SQLite)</div>
+      <div class="db-filters">
+        <div>
+          <span class="field-label">Topic</span>
+          <select id="dbTopic">
+            <option value="">All topics</option>
+            <option value="AI_ML">AI / Machine Learning</option>
+            <option value="glioblastoma">Glioblastoma</option>
+            <option value="meningioma">Meningioma</option>
+            <option value="spine">Spine</option>
+            <option value="vascular">Vascular</option>
+            <option value="outcomes_research">Outcomes Research</option>
+            <option value="global_neurosurgery">Global Neurosurgery</option>
+            <option value="intraoperative_tech">Intraoperative Tech</option>
+            <option value="radiosurgery">Radiosurgery</option>
+            <option value="epilepsy_surgery">Epilepsy Surgery</option>
+            <option value="pediatric">Pediatric</option>
+            <option value="trauma">Trauma</option>
+          </select>
+        </div>
+        <div>
+          <span class="field-label">Keyword</span>
+          <input type="text" id="dbKeyword" placeholder="any term..." style="width:100%" />
+        </div>
+        <div>
+          <span class="field-label">Year from</span>
+          <input type="number" id="dbYearFrom" placeholder="2018" style="width:100%" />
+        </div>
+        <div>
+          <span class="field-label">Year to</span>
+          <input type="number" id="dbYearTo" placeholder="2025" style="width:100%" />
+        </div>
+        <button class="btn btn-primary" onclick="runDbSearch()">Query</button>
+      </div>
+    </div>
 
-  <!-- Results -->
-  <div id="resultsArea">
-    <div class="empty-state">
-      <span class="empty-glyph">∂</span>
-      <p>Query the PubMed literature.<br>
-         Results are classified by topic, stored in SQLite,<br>
-         and exportable to CSV for systematic review workflows.</p>
+    <div class="status-bar">
+      <div class="dot" id="dbDot"></div>
+      <span id="dbStatus">Run a PubMed search first to populate the database, then query here.</span>
+    </div>
+
+    <div id="dbResults">
+      <div class="empty">
+        <span class="empty-glyph">◈</span>
+        <p>Your local SQLite database lives at <code>data/neurolit.db</code><br>
+           Every article you retrieve from PubMed is stored and deduplicated here.</p>
+      </div>
     </div>
   </div>
 
-</div>
+  <!-- ── TAB: Analytics ── -->
+  <div class="tab-panel" id="tab-analytics">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <span style="font-size:10px; letter-spacing:2px; color:var(--accent); text-transform:uppercase;">// Database Statistics</span>
+      <button class="btn btn-ghost btn-sm" onclick="loadStats()">Refresh</button>
+    </div>
+
+    <div id="analyticsContent">
+      <div class="empty">
+        <span class="empty-glyph">∑</span>
+        <p>Search PubMed to populate your database.<br>Analytics will appear here automatically.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── TAB: Clinical Trials ── -->
+  <div class="tab-panel" id="tab-trials">
+    <div class="panel">
+      <div class="panel-label">// ClinicalTrials.gov · Live Search</div>
+      <div class="search-row">
+        <input type="text" id="trialCondition" placeholder='Condition: e.g. "glioblastoma", "meningioma"' value="glioblastoma" />
+        <input type="text" id="trialIntervention" placeholder='Intervention (optional): e.g. "surgery"' style="max-width:240px" />
+        <button class="btn btn-primary" id="trialsBtn" onclick="runTrialsSearch()">Search Trials</button>
+      </div>
+      <div class="filters" style="margin-top:10px">
+        <span class="fl">Status:</span>
+        <select id="trialStatus">
+          <option value="">Any status</option>
+          <option value="RECRUITING">Recruiting</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="ACTIVE_NOT_RECRUITING">Active, not recruiting</option>
+          <option value="NOT_YET_RECRUITING">Not yet recruiting</option>
+          <option value="TERMINATED">Terminated</option>
+        </select>
+        <span class="fl">Max:</span>
+        <input type="number" id="trialsMax" value="15" min="1" max="50" />
+      </div>
+      <div class="chips" style="margin-top:10px">
+        <span class="chip-label">Quick:</span>
+        <span class="chip" onclick="setTrialQ('glioblastoma','surgery')">GBM + Surgery</span>
+        <span class="chip" onclick="setTrialQ('glioblastoma','temozolomide')">GBM + TMZ</span>
+        <span class="chip" onclick="setTrialQ('meningioma','')">Meningioma</span>
+        <span class="chip" onclick="setTrialQ('brain tumor','immunotherapy')">Brain tumor + Immunotherapy</span>
+        <span class="chip" onclick="setTrialQ('spinal cord','surgery')">Spinal + Surgery</span>
+        <span class="chip" onclick="setTrialQ('epilepsy','resection')">Epilepsy + Resection</span>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div class="dot" id="trialsDot"></div>
+      <span id="trialsStatus">Ready. Results fetched live from ClinicalTrials.gov and stored in your local database.</span>
+    </div>
+
+    <div id="trialsResults">
+      <div class="empty">
+        <span class="empty-glyph">⊕</span>
+        <p>Search ClinicalTrials.gov for active, completed, or recruiting neurosurgical trials.<br>
+           Results are stored alongside your PubMed literature for integrated evidence synthesis.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
 
 <footer>
-  <span class="footer-left">NeuroLit Miner — evidence synthesis infrastructure</span>
-  <span>NCBI E-utilities API · SQLite · Python 3</span>
+  <span class="footer-left">NeuroLit Miner · evidence synthesis infrastructure</span>
+  <span>Flask · SQLite · NCBI E-utilities · ClinicalTrials.gov · Python 3</span>
 </footer>
 
 <script>
-  // ── State ──────────────────────────────────────────────────────────────
+  // ── State ────────────────────────────────────────────────────────────────
   let sessionCount = 0;
-  let totalStored  = 0;
-  let searchCount  = 0;
+  let currentResults = [];
+  let currentTrials = [];
 
-  // ── UI helpers ─────────────────────────────────────────────────────────
-  function setStatus(msg, state = "") {
-    document.getElementById("statusText").textContent = msg;
-    const dot = document.getElementById("statusDot");
-    dot.className = "dot" + (state ? " " + state : "");
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      const names = ['search','database','analytics','trials'];
+      t.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'analytics') loadStats();
   }
 
-  function setQuery(q) {
-    document.getElementById("queryInput").value = q;
-    document.getElementById("queryInput").focus();
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function setQ(q) {
+    document.getElementById('queryInput').value = q;
+    document.getElementById('queryInput').focus();
   }
 
-  function showSkeletons(n = 4) {
-    let html = "";
-    for (let i = 0; i < n; i++) {
-      html += `<div class="skeleton-card">
-        <div class="skeleton" style="width:${60+Math.random()*30}%"></div>
-        <div class="skeleton" style="width:${30+Math.random()*20}%; height:9px; opacity:0.5"></div>
-        <div class="skeleton" style="width:100%; height:9px; opacity:0.3; margin-top:10px"></div>
-        <div class="skeleton" style="width:80%; height:9px; opacity:0.3"></div>
+  function setStatus(msg, state='') {
+    document.getElementById('statusText').textContent = msg;
+    const d = document.getElementById('statusDot');
+    d.className = 'dot' + (state ? ' '+state : '');
+  }
+
+  function setDbStatus(msg, state='') {
+    document.getElementById('dbStatus').textContent = msg;
+    const d = document.getElementById('dbDot');
+    d.className = 'dot' + (state ? ' '+state : '');
+  }
+
+  function showSkeletons(container, n=5) {
+    let h = '';
+    for (let i=0; i<n; i++) {
+      h += `<div class="skeleton-card">
+        <div class="skeleton" style="width:${55+Math.random()*35}%"></div>
+        <div class="skeleton" style="width:${30+Math.random()*20}%;height:9px;opacity:.5"></div>
+        <div class="skeleton" style="width:100%;height:9px;opacity:.3;margin-top:10px"></div>
+        <div class="skeleton" style="width:75%;height:9px;opacity:.3"></div>
       </div>`;
     }
-    document.getElementById("resultsArea").innerHTML = html;
+    document.getElementById(container).innerHTML = h;
   }
 
-  function renderTopicTag(t) {
-    return `<span class="topic-tag tag-${t}">${t.replace(/_/g," ")}</span>`;
+  function renderTag(t) {
+    return `<span class="topic-tag tag-${t}">${t.replace(/_/g,' ')}</span>`;
   }
 
   function renderArticle(a, idx) {
-    const topicsArr = (typeof a.topics === 'string') ? a.topics.split('|').filter(Boolean) : (a.topics || []);
-    const topics  = topicsArr.map(renderTopicTag).join("");
-    const pmidUrl = a.url || `https://pubmed.ncbi.nlm.nih.gov/${a.pmid}/`;
-    const authors = a.authors && a.authors.length > 80 ? a.authors.slice(0,77)+"…" : a.authors || '';
-
+    const topics  = (a.topics || 'uncategorized').split('|').map(renderTag).join('');
+    const authors = (a.authors||'').length > 80 ? a.authors.slice(0,77)+'…' : (a.authors||'N/A');
+    const pmidUrl = `https://pubmed.ncbi.nlm.nih.gov/${a.pmid}/`;
     return `
-    <div class="article-card" style="animation-delay:${idx*0.04}s">
-      <div class="article-title">${a.title}</div>
+    <div class="article-card" style="animation-delay:${idx*0.035}s">
+      <div class="article-title">${a.title||'No title'}</div>
       <div class="article-meta">
-        <span class="meta-item">📅 ${a.year}</span>
-        <span class="meta-item">📰 ${a.journal}</span>
-        <span class="meta-item">👤 ${authors}</span>
+        <span>📅 ${a.year||'—'}</span>
+        <span>📰 ${a.journal||'—'}</span>
+        <span>👤 ${authors}</span>
         <a class="pmid-link" href="${pmidUrl}" target="_blank">PMID: ${a.pmid}</a>
+        ${a.doi ? `<a class="pmid-link" href="https://doi.org/${a.doi}" target="_blank">DOI ↗</a>` : ''}
       </div>
       <div>${topics}</div>
-      <button class="toggle-abstract" onclick="toggleAbstract(this)">[ show abstract ]</button>
-      <div class="abstract-text">${a.abstract || ''}</div>
+      ${a.mesh_terms ? `<div class="mesh-section">
+        <span class="mesh-label">MeSH</span>
+        ${a.mesh_terms.split('|').filter(t=>t).slice(0,8).map(t=>`<span class="mesh-tag">${t}</span>`).join('')}
+        ${a.mesh_terms.split('|').filter(t=>t).length > 8 ? `<span style="font-size:10px;color:var(--dim)">+${a.mesh_terms.split('|').filter(t=>t).length-8} more</span>` : ''}
+      </div>` : '<div style="font-size:10px;color:var(--dim);margin-top:5px;opacity:.5">MeSH terms pending NLM indexing</div>'}
+      <button class="toggle-abstract" onclick="toggleAbs(this)">[show abstract]</button>
+      <div class="abstract-text">${a.abstract||'No abstract available.'}</div>
     </div>`;
   }
 
-  function toggleAbstract(btn) {
+  function toggleAbs(btn) {
     const el = btn.nextElementSibling;
-    el.classList.toggle("open");
-    btn.textContent = el.classList.contains("open") ? "[ hide abstract ]" : "[ show abstract ]";
+    el.classList.toggle('open');
+    btn.textContent = el.classList.contains('open') ? '[hide abstract]' : '[show abstract]';
   }
 
-  function updateStats() {
-    document.getElementById("statTotal").textContent   = totalStored;
-    document.getElementById("statSearches").textContent = searchCount;
-    document.getElementById("statSession").textContent  = sessionCount;
-  }
-
-  // ── Main search (calls Flask backend) ─────────────────────────────────
-  async function runSearch() {
-    const query   = document.getElementById("queryInput").value.trim();
-    const maxRes  = parseInt(document.getElementById("maxResults").value) || 8;
-    const yearFrom = document.getElementById("yearFrom").value;
-    const yearTo   = document.getElementById("yearTo").value;
-
-    if (!query) {
-      setStatus("Please enter a search query.", "error");
+  function renderResultsBlock(articles, container, exportable=true) {
+    if (!articles.length) {
+      document.getElementById(container).innerHTML = `<div class="empty"><span class="empty-glyph">∅</span><p>No articles matched your query.</p></div>`;
       return;
     }
+    const exportBtn = exportable
+      ? `<button class="btn btn-ghost btn-sm" onclick="exportResults()">Export CSV</button>`
+      : '';
+    const html = `
+      <div class="results-header">
+        <span class="results-count"><strong>${articles.length}</strong> articles</span>
+        ${exportBtn}
+      </div>
+      ${articles.map((a,i) => renderArticle(a,i)).join('')}`;
+    document.getElementById(container).innerHTML = html;
+  }
 
-    const btn = document.getElementById("searchBtn");
+  // ── PubMed Search ─────────────────────────────────────────────────────────
+  async function runSearch() {
+    const query    = document.getElementById('queryInput').value.trim();
+    const max      = parseInt(document.getElementById('maxResults').value) || 10;
+    const yearFrom = document.getElementById('yearFrom').value;
+    const yearTo   = document.getElementById('yearTo').value;
+
+    if (!query) { setStatus('Please enter a query.', 'error'); return; }
+
+    const btn = document.getElementById('searchBtn');
     btn.disabled = true;
-
-    setStatus(`Querying PubMed: "${query}" …`, "active");
-    showSkeletons(maxRes);
+    setStatus(`Querying PubMed: "${query}" …`, 'active');
+    showSkeletons('searchResults', Math.min(max, 6));
 
     try {
-      const payload = { query: query, max_results: maxRes };
-      if (yearFrom) payload.year_from = parseInt(yearFrom);
-      if (yearTo) payload.year_to = parseInt(yearTo);
-
-      const resp = await fetch('/api/search', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ query, max, year_from: yearFrom||null, year_to: yearTo||null })
       });
+      const data = await res.json();
 
-      if (!resp.ok) {
-        const err = await resp.json().catch(()=>({error:'unknown'}));
-        throw new Error(err.error || `Server returned ${resp.status}`);
-      }
+      if (data.error) throw new Error(data.error);
 
-      const body = await resp.json();
+      currentResults = data.articles || [];
+      sessionCount  += currentResults.length;
+      document.getElementById('sSession').textContent = sessionCount;
 
-      // The server returns a structured response: {articles, retrieved, inserted, duplicates, total_articles}
-      const articles = body.articles || [];
-      const retrieved = body.retrieved || articles.length;
-      const inserted  = body.inserted || 0;
-      const duplicates = body.duplicates || Math.max(0, retrieved - inserted);
-      const totalArticles = body.total_articles || 0;
-
-      // Update simple client-side session counters
-      sessionCount += retrieved;
-      totalStored = totalArticles;
-      searchCount++;
-      updateStats();
-
-      const resultHtml = `
-        <div class="results-header">
-          <div>
-            <div class="results-count">
-              <strong>${retrieved}</strong> retrieved for "${query}" — <strong>${inserted}</strong> new, <strong>${duplicates}</strong> duplicates skipped
-            </div>
-            <div style="font-size:12px;color:var(--text-dim);margin-top:6px">Total articles stored in local SQLite database: <strong>${totalArticles}</strong> (cumulative)</div>
-          </div>
-          <div>
-            <button class="btn btn-ghost" id="exportBtn">Export CSV</button>
-          </div>
-        </div>
-        ${articles.map((a, i) => renderArticle(a, i)).join("")}`;
-
-      document.getElementById("resultsArea").innerHTML = resultHtml;
-      document.getElementById('exportBtn').addEventListener('click', async () => {
-        // Trigger AJAX export which creates the CSV on server and returns filename
-        try {
-          setStatus('Exporting CSV from DB snapshot...', 'active');
-          const res = await fetch('/api/export?ajax=1');
-          const j = await res.json();
-          if (!res.ok) {
-            throw new Error(j.error || 'Export failed');
-          }
-          setStatus(j.message || 'CSV exported', 'done');
-          // Then trigger the download
-          const filename = encodeURIComponent(j.filename);
-          window.location = `/api/export/download?file=${filename}`;
-        } catch(e) {
-          setStatus('CSV export failed: ' + e.message, 'error');
-        }
-      });
-
-      setStatus(`Retrieved ${retrieved} · ${inserted} new · total in DB: ${totalStored}`, "done");
+      renderResultsBlock(currentResults, 'searchResults');
+      setStatus(data.message || `${currentResults.length} articles retrieved.`, 'done');
+      loadStatsQuiet();
 
     } catch(err) {
-      setStatus("Error: " + err.message, "error");
-      document.getElementById("resultsArea").innerHTML = `
-        <div class="empty-state">
-          <span class="empty-glyph">⚠</span>
-          <p>${err.message}</p>
-        </div>`;
+      setStatus('Error: ' + err.message, 'error');
+      document.getElementById('searchResults').innerHTML = `<div class="empty"><span class="empty-glyph">⚠</span><p>${err.message}</p></div>`;
     }
-
     btn.disabled = false;
   }
 
-  // ── CSV export (requests server endpoint) ─────────────────────────────
-  function exportCSV() {
-    // Trigger download from server
-    window.location = '/api/export';
-    setStatus('Preparing CSV export…', 'active');
+  // ── DB Search ─────────────────────────────────────────────────────────────
+  async function runDbSearch() {
+    const topic    = document.getElementById('dbTopic').value;
+    const keyword  = document.getElementById('dbKeyword').value;
+    const yearFrom = document.getElementById('dbYearFrom').value;
+    const yearTo   = document.getElementById('dbYearTo').value;
+
+    setDbStatus('Querying local database…', 'active');
+    showSkeletons('dbResults', 4);
+
+    try {
+      const params = new URLSearchParams();
+      if (topic)    params.set('topic', topic);
+      if (keyword)  params.set('keyword', keyword);
+      if (yearFrom) params.set('year_from', yearFrom);
+      if (yearTo)   params.set('year_to', yearTo);
+
+      const res  = await fetch('/api/db/search?' + params);
+      const data = await res.json();
+
+      renderResultsBlock(data.articles||[], 'dbResults', false);
+      setDbStatus(`${data.total} articles in local database matching filters.`, 'done');
+
+    } catch(err) {
+      setDbStatus('Error: ' + err.message, 'error');
+    }
   }
 
-  // Initialize stats on load
-  document.addEventListener("DOMContentLoaded", async () => {
-    document.getElementById("queryInput").addEventListener("keydown", e => { if (e.key === "Enter") runSearch(); });
+  // ── Export ────────────────────────────────────────────────────────────────
+  async function exportResults() {
+    if (!currentResults.length) return;
     try {
-      const stats = await fetch('/api/stats').then(r=>r.json());
-      totalStored = stats.total_articles || 0;
-      searchCount  = stats.total_searches || 0;
-    } catch(e) {
-      // ignore
+      const res  = await fetch('/api/export', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({articles: currentResults})
+      });
+      const data = await res.json();
+      setStatus(`✓ Exported ${data.count} articles → ${data.path}`, 'done');
+    } catch(err) {
+      setStatus('Export error: ' + err.message, 'error');
     }
-    updateStats();
+  }
+
+  // ── Analytics ─────────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const res  = await fetch('/api/stats');
+      const data = await res.json();
+
+      document.getElementById('sTotal').textContent    = data.total_articles ?? '—';
+      document.getElementById('sSearches').textContent = data.total_searches ?? '—';
+
+      if (!data.total_articles) {
+        document.getElementById('analyticsContent').innerHTML = `<div class="empty"><span class="empty-glyph">∑</span><p>No data yet. Run a PubMed search to populate your database.</p></div>`;
+        return;
+      }
+
+      // Year chart
+      let yearChart = '';
+      const years = data.articles_by_year || {};
+      const maxY  = Object.values(years).length ? Math.max(...Object.values(years)) : 1;
+      for (const [yr, n] of Object.entries(years)) {
+        const pct = Math.round((n/maxY)*100);
+        yearChart += `<div class="chart-bar">
+          <span class="chart-bar-label">${yr}</span>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
+          <span class="chart-bar-n">${n}</span>
+        </div>`;
+      }
+
+      // Topic chart
+      let topicChart = '';
+      const topics = data.topic_distribution || {};
+      const maxT   = Object.values(topics).length ? Math.max(...Object.values(topics)) : 1;
+      for (const [tp, n] of Object.entries(topics)) {
+        const pct = Math.round((n/maxT)*100);
+        topicChart += `<div class="chart-bar">
+          <span class="chart-bar-label">${tp.replace(/_/g,' ')}</span>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:#0084ff"></div></div>
+          <span class="chart-bar-n">${n}</span>
+        </div>`;
+      }
+
+      // MeSH chart
+      let meshChart = '';
+      const meshTerms = data.top_mesh_terms || {};
+      const maxM = Object.values(meshTerms).length ? Math.max(...Object.values(meshTerms)) : 1;
+      for (const [term, n] of Object.entries(meshTerms)) {
+        const pct = Math.round((n/maxM)*100);
+        meshChart += `<div class="chart-bar">
+          <span class="chart-bar-label" style="color:#fbbf24">${term}</span>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:#fbbf24;opacity:.7"></div></div>
+          <span class="chart-bar-n">${n}</span>
+        </div>`;
+      }
+
+      document.getElementById('analyticsContent').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+          <div>
+            <div class="panel-label" style="margin-bottom:14px">// Articles by year</div>
+            ${yearChart || '<p style="color:var(--dim);font-size:12px">No data</p>'}
+          </div>
+          <div>
+            <div class="panel-label" style="margin-bottom:14px">// Topic distribution</div>
+            ${topicChart || '<p style="color:var(--dim);font-size:12px">No data</p>'}
+          </div>
+        </div>
+        ${meshChart ? `<div style="margin-top:28px">
+          <div class="panel-label" style="margin-bottom:8px">// Top MeSH terms · NLM-assigned · authoritative</div>
+          <div style="font-size:10px;color:var(--dim);margin-bottom:12px">
+            ${data.total_mesh_indexed||0} of ${data.total_articles||0} articles have MeSH indexing
+          </div>
+          ${meshChart}
+        </div>` : ''}`;
+
+    } catch(err) {
+      document.getElementById('analyticsContent').innerHTML = `<div class="empty"><p>Could not load stats: ${err.message}</p></div>`;
+    }
+  }
+
+  async function loadStatsQuiet() {
+    try {
+      const res  = await fetch('/api/stats');
+      const data = await res.json();
+      document.getElementById('sTotal').textContent    = data.total_articles ?? '—';
+      document.getElementById('sSearches').textContent = data.total_searches ?? '—';
+    } catch(e) {}
+    try {
+      const res2  = await fetch('/api/trials/stats');
+      const data2 = await res2.json();
+      document.getElementById('sTrials').textContent = data2.total_trials ?? '—';
+    } catch(e) {}
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    loadStatsQuiet();
+    document.getElementById('queryInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') runSearch();
+    });
   });
+
+  // ── Trials ───────────────────────────────────────────────────────────────
+  function setTrialQ(condition, intervention) {
+    document.getElementById('trialCondition').value = condition;
+    document.getElementById('trialIntervention').value = intervention;
+  }
+
+  function setTrialStatus(msg, state='') {
+    document.getElementById('trialsStatus').textContent = msg;
+    const d = document.getElementById('trialsDot');
+    d.className = 'dot' + (state ? ' '+state : '');
+  }
+
+  function statusColor(s) {
+    if (!s) return 'var(--dim)';
+    s = s.toLowerCase();
+    if (s.includes('recruit')) return '#34d399';
+    if (s.includes('complet')) return '#7dd3fc';
+    if (s.includes('active'))  return '#fcd34d';
+    if (s.includes('terminat') || s.includes('withdrawn')) return '#fca5a5';
+    return 'var(--dim)';
+  }
+
+  function renderTrial(t, idx) {
+    const status_color = statusColor(t.status);
+    const countries = t.countries ? t.countries.replace(/\|/g,' · ') : '—';
+    const phase     = t.phase || 'N/A';
+    const enroll    = t.enrollment ? `${t.enrollment} pts` : '—';
+    return `
+    <div class="article-card" style="animation-delay:${idx*0.035}s; border-left: 2px solid ${status_color}">
+      <div class="article-title">${t.title||'No title'}</div>
+      <div class="article-meta">
+        <span style="color:${status_color}">● ${t.status||'—'}</span>
+        <span>Phase: ${phase}</span>
+        <span>👥 ${enroll}</span>
+        <span>📅 ${t.start_date||'—'} → ${t.completion_date||'—'}</span>
+        <a class="pmid-link" href="${t.url}" target="_blank">${t.nct_id} ↗</a>
+      </div>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:6px">
+        <strong style="color:var(--text)">Condition:</strong> ${t.condition||'—'} &nbsp;|&nbsp;
+        <strong style="color:var(--text)">Sponsor:</strong> ${t.sponsor||'—'} &nbsp;|&nbsp;
+        <strong style="color:var(--text)">Countries:</strong> ${countries}
+      </div>
+      ${t.intervention ? `<div style="font-size:11px;color:var(--dim);margin-bottom:6px"><strong style="color:var(--text)">Intervention:</strong> ${t.intervention}</div>` : ''}
+      ${t.primary_outcome ? `<div style="font-size:11px;color:var(--dim);margin-bottom:6px"><strong style="color:var(--text)">Primary endpoint:</strong> ${t.primary_outcome}</div>` : ''}
+      ${t.summary ? `<button class="toggle-abstract" onclick="toggleAbs(this)">[show summary]</button>
+      <div class="abstract-text">${t.summary}</div>` : ''}
+    </div>`;
+  }
+
+  async function runTrialsSearch() {
+    const condition    = document.getElementById('trialCondition').value.trim();
+    const intervention = document.getElementById('trialIntervention').value.trim();
+    const status       = document.getElementById('trialStatus').value;
+    const max          = parseInt(document.getElementById('trialsMax').value) || 15;
+
+    if (!condition) { setTrialStatus('Please enter a condition.', 'error'); return; }
+
+    const btn = document.getElementById('trialsBtn');
+    btn.disabled = true;
+    setTrialStatus(`Querying ClinicalTrials.gov: "${condition}" …`, 'active');
+    showSkeletons('trialsResults', Math.min(max, 5));
+
+    try {
+      const res  = await fetch('/api/trials/search', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({condition, intervention: intervention||null, status: status||null, max})
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      const trials = data.trials || [];
+      if (!trials.length) {
+        document.getElementById('trialsResults').innerHTML = `<div class="empty"><span class="empty-glyph">∅</span><p>No trials found. Try a different condition or remove status filter.</p></div>`;
+        setTrialStatus('No results found.', 'error');
+      } else {
+        document.getElementById('trialsResults').innerHTML = `
+          <div class="results-header">
+            <span class="results-count"><strong>${trials.length}</strong> trials · <strong>${data.inserted}</strong> new stored</span>
+            <button class="btn btn-ghost btn-sm" onclick="exportTrialsCSV()">Export CSV</button>
+          </div>
+          ${trials.map((t,i) => renderTrial(t,i)).join('')}`;
+        currentTrials = trials;
+        setTrialStatus(data.message, 'done');
+      }
+      loadStatsQuiet();
+      // Update trials counter immediately
+      try { const ts = await fetch('/api/trials/stats'); const td = await ts.json(); document.getElementById('sTrials').textContent = td.total_trials ?? '—'; } catch(e) {}
+
+    } catch(err) {
+      setTrialStatus('Error: ' + err.message, 'error');
+      document.getElementById('trialsResults').innerHTML = `<div class="empty"><span class="empty-glyph">⚠</span><p>${err.message}</p></div>`;
+    }
+    btn.disabled = false;
+  }
+
+
+  // ── Trials CSV export ────────────────────────────────────────────────────
+  function exportTrialsCSV() {
+    if (!currentTrials.length) return;
+    const headers = ['nct_id','title','status','phase','condition','intervention',
+                     'sponsor','enrollment','start_date','completion_date',
+                     'primary_outcome','countries','url'];
+    const rows = currentTrials.map(t =>
+      headers.map(h => `"${String(t[h]||'').replace(/"/g,'""')}"`).join(',')
+    );
+    const csv  = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `neurolit_trials_${Date.now()}.csv`;
+    a.click();
+    setTrialStatus(`Exported ${currentTrials.length} trials to CSV.`, 'done');
+  }
+
 </script>
 </body>
 </html>

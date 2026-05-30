@@ -10,9 +10,20 @@ PubMed's efetch returns PubmedArticleSet XML. Each article contains:
   - MedlineCitation > Article > AuthorList > Author
   - MedlineCitation > Article > Journal > Title
   - MedlineCitation > Article > Journal > JournalIssue > PubDate
-  - MedlineCitation > MeshHeadingList (MeSH terms, V2+)
+  - MedlineCitation > MeshHeadingList (MeSH terms — extracted as of V1.5)
 
-This module also assigns topic tags based on keyword matching in title+abstract.
+This module:
+  1. Extracts MeSH headings directly from PubMed XML (structured biomedical ontology)
+  2. Assigns keyword-based topic tags (fast, customizable, acknowledged as approximate)
+
+MeSH terms are the authoritative NLM-assigned subject headings. They are:
+  - hierarchical (disease → subtype → specific condition)
+  - consistent across articles regardless of author terminology
+  - the foundation for semantic filtering, co-occurrence analysis, and topic graphs
+  - already present in the XML we fetch — zero additional API calls needed
+
+Current limitation (honest): keyword topic tagging is still approximate.
+MeSH terms are the ground truth; topic tags are a fast navigation layer.
 """
 
 import xml.etree.ElementTree as ET
@@ -22,13 +33,9 @@ from typing import Optional
 # ── Topic taxonomy ──────────────────────────────────────────────────────────
 # Maps a topic label to a list of keywords (case-insensitive substring match).
 # Edit or extend this dict to customize your surveillance categories.
-#
-# WARNING: "gbm" is NOT included in glioblastoma keywords because it matches
-# "gradient boosting machine" (ML technique), causing false positives in papers
-# on TBI + ML, spine surgery + ML, etc. Use full terms instead.
 
 TOPIC_KEYWORDS = {
-    "glioblastoma":         ["glioblastoma", "glioma", "high-grade glioma", "astrocytoma"],
+    "glioblastoma":         ["glioblastoma", "gbm", "glioma", "high-grade glioma", "astrocytoma"],
     "meningioma":           ["meningioma"],
     "spine":                ["spine", "spinal", "vertebral", "disc herniation", "spondylosis",
                              "myelopathy", "cord compression"],
@@ -161,12 +168,53 @@ def _extract_abstract(article_node) -> str:
     return " ".join(texts) if texts else "No abstract available."
 
 
+
+def _extract_mesh(medline_node) -> list[str]:
+    """
+    Extract MeSH (Medical Subject Headings) terms from a MedlineCitation node.
+
+    PubMed XML structure for MeSH:
+        MedlineCitation
+          └── MeshHeadingList
+                └── MeshHeading (one per term)
+                      ├── DescriptorName  (main heading, e.g. "Glioblastoma")
+                      └── QualifierName   (subheading, e.g. "surgery", "diagnosis")
+
+    We extract DescriptorName only (not qualifiers) to keep terms clean and
+    suitable for frequency analysis and co-occurrence mapping.
+
+    MeSH terms are NLM-assigned after peer review — they are authoritative,
+    consistent, and ontology-structured. Unlike keyword tags, they do not depend
+    on author terminology and work across languages.
+
+    Args:
+        medline_node: the MedlineCitation XML element
+
+    Returns:
+        List of MeSH descriptor strings (empty list if none assigned)
+        Example: ["Glioblastoma", "Brain Neoplasms", "Neurosurgery",
+                  "Machine Learning", "Prognosis"]
+    """
+    mesh_list = medline_node.find("MeshHeadingList")
+    if mesh_list is None:
+        # MeSH terms are only assigned after NLM indexing (can take weeks
+        # after publication). Very recent articles will have an empty list.
+        return []
+
+    terms = []
+    for heading in mesh_list.findall("MeshHeading"):
+        descriptor = heading.find("DescriptorName")
+        if descriptor is not None and descriptor.text:
+            terms.append(descriptor.text.strip())
+
+    return terms
+
 def parse_xml(xml_string: str) -> list[dict]:
     """
     Parse a PubMed efetch XML response into a list of article dictionaries.
 
     Each dict contains:
-        pmid, title, authors, journal, year, abstract, topics, doi
+        pmid, title, authors, journal, year, abstract, topics, mesh_terms, doi
 
     Args:
         xml_string: raw XML string from fetch_records()
@@ -212,6 +260,10 @@ def parse_xml(xml_string: str) -> list[dict]:
             authors  = _extract_authors(article)
             abstract = _extract_abstract(article)
 
+            # MeSH terms — extracted from MeshHeadingList on MedlineCitation
+            # Note: medline node is the parent, not the article node
+            mesh_terms = _extract_mesh(medline)
+
             # DOI — stored in ELocationID with EIdType="doi"
             doi = ""
             for loc in article.findall(".//ELocationID"):
@@ -222,15 +274,16 @@ def parse_xml(xml_string: str) -> list[dict]:
             topics = assign_topics(title, abstract)
 
             articles.append({
-                "pmid":     pmid,
-                "title":    title,
-                "authors":  authors,
-                "journal":  journal,
-                "year":     year,
-                "abstract": abstract,
-                "topics":   "|".join(topics),   # pipe-separated for DB storage
-                "doi":      doi,
-                "url":      f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else "",
+                "pmid":       pmid,
+                "title":      title,
+                "authors":    authors,
+                "journal":    journal,
+                "year":       year,
+                "abstract":   abstract,
+                "topics":     "|".join(topics),      # keyword-based, approximate
+                "mesh_terms": "|".join(mesh_terms),  # NLM-assigned, authoritative
+                "doi":        doi,
+                "url":        f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else "",
             })
 
         except Exception as e:
