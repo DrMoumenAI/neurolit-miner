@@ -20,7 +20,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from pubmed_api import search_pubmed, fetch_records
 from parser     import parse_xml
-from database   import initialize_db, insert_articles, log_search, query_articles, get_stats
+from database   import (initialize_db, insert_articles, log_search,
+                         query_articles, get_stats, backfill_taxonomy)
 from exporter   import export_to_csv, print_summary_table
 
 
@@ -153,10 +154,21 @@ Examples:
     parser.add_argument("--export",  action="store_true",
                         help="Export results to CSV in results/")
 
+    # ── V3.1 taxonomy backfill ────────────────────────────────────────────
+    parser.add_argument("--backfill_taxonomy", action="store_true",
+                        help="V3.1: Re-tag UNVERIFIED articles with "
+                             "three-axis taxonomy and confidence scores")
+    parser.add_argument("--force_backfill", action="store_true",
+                        help="V3.1: Force re-tag ALL articles (including "
+                             "already-tagged ones)")
+
     args = parser.parse_args()
 
     # ── Route to correct handler ──────────────────────────────────────────
-    if args.stats:
+    if args.backfill_taxonomy or args.force_backfill:
+        initialize_db()
+        backfill_taxonomy(force=args.force_backfill)
+    elif args.stats:
         run_stats(args)
     elif args.search_db:
         run_db_search(args)
