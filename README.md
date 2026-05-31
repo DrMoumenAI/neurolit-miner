@@ -142,7 +142,7 @@ python run_app.py
 | V1 | ✅ Done | PubMed search, SQLite storage, CSV export, topic tagging |
 | V1.5 | ✅ Done | ClinicalTrials.gov module, MeSH extraction, web UI analytics |
 | V2 | ✅ Done | Publication trend, journal distribution, MeSH frequency, co-occurrence matrix |
-| V3 | ✅ Done | Automated evidence synthesis framework for biomedical literature, including structured summaries of current evidence, dominant methodologies, key findings, and research gaps through a provider-agnostic LLM architecture.
+| V3 | ✅ Done | Automated biomedical literature synthesis module with provider-agnostic LLM support (mock, Ollama, Anthropic, OpenAI, and OpenRouter backends through a unified summarization interface), producing structured evidence summaries, methodology trend analysis, key findings, and research-gap exploration.
 
 ---
 
