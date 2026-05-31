@@ -356,12 +356,62 @@ def build_full_markdown(summary: str, articles: list[dict],
     return header + taxonomy_block + summary + footer
 
 
+
+def _build_filter_slug(filters: dict) -> str:
+    """
+    Build a human-readable filename slug from active filters.
+    Ensures each synthesis run produces a unique, descriptive filename
+    even when multiple runs happen within the same second.
+
+    Examples:
+      {"clinical_topic": "glioblastoma", "min_confidence": "HIGH"}
+      → "clinical-glioblastoma_conf-high"
+
+      {"clinical_topic": "glioblastoma", "domain": "surgical_outcomes"}
+      → "clinical-glioblastoma_domain-surgical-outcomes"
+
+      {"topic": "glioblastoma"}
+      → "topic-glioblastoma"
+
+    Rules:
+      - Short key prefixes to keep filenames readable
+      - Underscores in values replaced with hyphens (filesystem-safe)
+      - Maximum 80 chars total to avoid path length issues
+      - Empty filters → "all" (no filter applied)
+    """
+    PREFIX = {
+        "clinical_topic": "clinical",
+        "method":         "method",
+        "domain":         "domain",
+        "min_confidence": "conf",
+        "topic":          "topic",
+        "keyword":        "kw",
+        "year_from":      "from",
+        "year_to":        "to",
+    }
+    parts = []
+    # Fixed order so filenames are deterministic regardless of dict ordering
+    for key in ["clinical_topic", "topic", "method", "domain",
+                "min_confidence", "keyword", "year_from", "year_to"]:
+        val = filters.get(key)
+        if val:
+            prefix = PREFIX.get(key, key)
+            safe   = str(val).lower().replace("_", "-").replace(" ", "-")
+            parts.append(f"{prefix}-{safe}")
+
+    slug = "_".join(parts) if parts else "all"
+    # Truncate to avoid excessively long filenames
+    return slug[:80]
+
 def save_outputs(markdown: str, articles: list[dict],
-                 timestamp: str) -> dict:
-    """Save markdown, plain text, and bibliography CSV. Unchanged from V3."""
+                 timestamp: str, slug: str = "") -> dict:
+    """Save markdown, plain text, and bibliography CSV.
+    V3.1: slug appended to filename for uniqueness and readability.
+    """
     paths = {}
 
-    md = os.path.join(RESULTS_DIR, f"neurolit_summary_{timestamp}.md")
+    suffix = f"_{slug}" if slug else ""
+    md = os.path.join(RESULTS_DIR, f"neurolit_summary_{timestamp}{suffix}.md")
     with open(md, "w", encoding="utf-8") as f:
         f.write(markdown)
     paths["markdown"] = md
@@ -374,14 +424,14 @@ def save_outputs(markdown: str, articles: list[dict],
     plain = re.sub(r">\s*",             "",    plain)
     plain = re.sub(r"\[(.+?)\]\(.+?\)", r"\1", plain)
 
-    txt = os.path.join(RESULTS_DIR, f"neurolit_summary_{timestamp}.txt")
+    txt = os.path.join(RESULTS_DIR, f"neurolit_summary_{timestamp}{suffix}.txt")
     with open(txt, "w", encoding="utf-8") as f:
         f.write(plain)
     paths["text"] = txt
     print(f"  ✓ Text     : {txt}")
 
     # V3.1: bibliography includes new axis columns when present
-    bib = os.path.join(RESULTS_DIR, f"neurolit_sources_{timestamp}.csv")
+    bib = os.path.join(RESULTS_DIR, f"neurolit_sources_{timestamp}{suffix}.csv")
     fields = ["pmid", "title", "authors", "year", "journal",
               "mesh_terms", "clinical_topic_tags", "method_tags",
               "domain_tags", "topic_confidence", "url"]
@@ -599,12 +649,14 @@ Examples:
     print(f"\n  Running synthesis ({args.provider}) ...")
     summary = summarizer.summarize(articles, active_filters)
 
-    # Save outputs
+    # Build unique filename slug from active filters
+    # Keeps filenames human-readable and collision-free even within same second
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    slug      = _build_filter_slug(active_filters)
     full_md   = build_full_markdown(summary, articles, active_filters,
                                     args.provider, timestamp, meta)
     print("\n  Saving outputs ...")
-    paths = save_outputs(full_md, articles, timestamp)
+    paths = save_outputs(full_md, articles, timestamp, slug)
 
     # Terminal preview
     preview = summary[:500]
