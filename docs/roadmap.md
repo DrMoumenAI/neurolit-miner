@@ -143,7 +143,7 @@ Post-release cleanup and repository professionalization.
 
 ---
 
-### V4 — PICO Extraction Module
+### V4.0 — PICO Extraction Module
 **Priority:** Medium
 **New file:** `src/pico.py`
 
@@ -156,7 +156,7 @@ PICO (Population / Intervention / Comparator / Outcome) is the standard framewor
 
 ---
 
-### V5 — Evidence Grading
+### V4.1 — Study Design Classification
 **Priority:** Medium
 **New file:** `src/classifier.py`
 
@@ -174,14 +174,22 @@ Evidence level stored per article. Badge display in Flask UI. Integrated into sy
 
 ---
 
-### V5.1 — Articles–Trials Cross-Reference
+### V4.2 — Research Gap Detection
+**Priority:** Medium  
+**New file:** `src/gaps.py`
+
+Systematic extraction of stated limitations and future directions across a corpus. Aggregates gap patterns, identifies most-cited research needs, produces a structured gap map. Output: structured gap frequency table + narrative summary.
+
+---
+
+### V4.3 — Article–Trial Cross-Reference
 **Priority:** Medium
 
 Link stored PubMed articles to stored ClinicalTrials.gov trials by clinical topic MeSH term and condition field. Identify articles with corresponding active trials and vice versa. Cross-reference table in SQLite. New Flask UI tab.
 
 ---
 
-### V6 — Export Enhancements
+### V5.0 — Export Enhancements
 **Priority:** Low–Medium
 
 - RIS / BibTeX export for reference managers (Zotero, Mendeley, EndNote)
@@ -191,7 +199,7 @@ Link stored PubMed articles to stored ClinicalTrials.gov trials by clinical topi
 
 ---
 
-### V7 — Full UI Integration
+### V5.1 — Full UI Integration
 **Priority:** Low
 
 - `analyze.py` figures rendered inline in Analytics tab
@@ -201,7 +209,7 @@ Link stored PubMed articles to stored ClinicalTrials.gov trials by clinical topi
 
 ---
 
-### V8 — NeurosurgEval Integration
+### V6.0 — NeurosurgEval Integration
 **Priority:** Long-term, contingent
 
 Integration point for a future neurosurgical evidence evaluation framework. NeuroLit Miner provides retrieval, taxonomy, analytics, and synthesis infrastructure. NeurosurgEval would provide domain-specific evaluation rubrics and quality criteria.

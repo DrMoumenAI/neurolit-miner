@@ -65,119 +65,76 @@ and composable with others.
 
 ## Planned
 
-### V3.1 — PICO Extraction Module
-**File:** `src/pico.py`  
-**What:** Extract structured PICO elements from each abstract:
-- Population (patient demographics, condition)
-- Intervention (surgery, drug, device, AI model)
-- Comparator (control arm, standard of care)
-- Outcome (primary endpoint, follow-up)
+### V3.2 — Flask UI Taxonomy and Synthesis Integration
+**Scope:** Flask UI update only — no new backend logic
 
-**Why:** PICO is the foundation of systematic review inclusion criteria.
-Automating extraction enables rapid evidence mapping.
-
-**Architecture:** Subclass `BaseSummarizer` as `PICOExtractor`.
-Same provider abstraction — mock mode extracts by keyword, LLM mode
-extracts semantically.
-
-**Output:** `results/pico_[timestamp].csv` — one row per article.
+- Three-axis tag display on article cards (Clinical Topic / Methodology / Domain)
+- Filter dropdowns in Local Database tab for each axis
+- Confidence badge on each article card
+- Analytics tab: three-axis distribution charts
+- Corpus purity score in Analytics tab
+- Synthesis button in UI calling `summarize.py` backend
 
 ---
 
-### V3.2 — Study Design Classification
-**File:** `src/classifier.py`  
-**What:** Classify each article by evidence level:
-- Level I: RCT, systematic review, meta-analysis
-- Level II: Prospective cohort
-- Level III: Retrospective cohort, case-control
-- Level IV: Case series
-- Level V: Expert opinion, case report
+### V4.0 — PICO Extraction Module
+**New file:** `src/pico.py`
 
-**Why:** Evidence grading is mandatory for systematic reviews and
-clinical guideline development.
+Extract structured PICO elements from each abstract:
+- **P** — Population (patient demographics, clinical topic)
+- **I** — Intervention (surgery, drug, device, AI model)
+- **C** — Comparator (control arm, standard of care)
+- **O** — Outcome (primary endpoint, follow-up)
 
-**Architecture:** Rule-based classifier (mock) + LLM classifier (LLM providers).
-Returns structured dict per article, stored back to SQLite.
+Architecture: subclass `BaseSummarizer` as `PICOExtractor`.
+Same provider abstraction — mock mode extracts by taxonomy fields,
+LLM mode extracts semantically. Output: `results/pico_[timestamp].csv`.
 
 ---
 
-### V3.3 — Research Gap Detection
-**File:** `src/gaps.py`  
-**What:** Systematic extraction of stated limitations and future directions
-across a corpus. Aggregates gap patterns, identifies most-cited research
-needs, produces a structured gap map.
+### V4.1 — Study Design Classification
+**New file:** `src/classifier.py`
 
-**Why:** Gap detection is the core output of a scoping review and the
-primary justification for new research proposals.
+Classify each article by evidence level using `method_tags`:
 
-**Output:** Gap frequency table + narrative summary.
-
----
-
-### V3.4 — Cross-Reference Module (Articles ↔ Trials)
-**File:** enhancement to `database.py` + `app.py`  
-**What:** Link stored PubMed articles to stored ClinicalTrials.gov trials
-by condition, MeSH term, and keyword. Surface articles that have
-corresponding active trials and vice versa.
-
-**Why:** Evidence gap between published literature and active trials is
-a key input for systematic reviews and research prioritisation.
-
-**Output:** Cross-reference table in SQLite + UI display in new tab.
+| Level | Study Design |
+|-------|-------------|
+| I | RCT, systematic review |
+| II | Prospective cohort |
+| III | Retrospective cohort |
+| IV | Case series |
+| V | Expert opinion |
 
 ---
 
-### V4 — Export Enhancements
-- [ ] RIS/BibTeX export for reference managers (Zotero, Mendeley, EndNote)
-- [ ] PRISMA flow diagram generator (screening stages)
-- [ ] Structured abstract table (one row per article, all fields)
-- [ ] Full summary report combining analyze.py figures + summarize.py text
+### V4.2 — Research Gap Detection
+**New file:** `src/gaps.py`
+
+Systematic extraction of stated limitations and future directions
+across a corpus. Aggregates gap patterns, identifies most-cited
+research needs, produces a structured gap map.
 
 ---
 
-### V5 — Visualisation Layer (Flask Integration)
-- [ ] Integrate analyze.py figures into Analytics tab (rendered inline)
-- [ ] Summarize button in Flask UI (calls summarizer.py, displays markdown)
-- [ ] PICO table view in Local Database tab
-- [ ] Evidence level badges on article cards
+### V4.3 — Article–Trial Cross-Reference Module
+**Enhancement to:** `database.py`, `app.py`
+
+Link stored PubMed articles to stored ClinicalTrials.gov trials
+by clinical topic MeSH term and condition field. Cross-reference
+table in SQLite. New Flask UI tab.
 
 ---
 
-## Module Interaction Map
+## Architecture Principles (Permanent)
 
-```
-PubMed API          ClinicalTrials API
-    ↓                       ↓
-pubmed_api.py         trials_api.py
-    ↓                       ↓
-parser.py          (direct JSON parse)
-    ↓                       ↓
-         database.py (SQLite)
-         ↙        ↓        ↘
-   analyze.py  summarize.py  [future: pico.py, classifier.py, gaps.py]
-      ↓              ↓
-  PNG + CSV     MD + TXT + CSV
-         ↘      ↙
-         app.py (Flask UI)
-              ↓
-        localhost:5000
-```
-
----
-
-## Design Decision Log
-
-| Decision | Rationale |
-|----------|-----------|
-| Default provider = mock | Platform must work with zero setup |
-| Provider abstraction in summarizer.py | Single registration point for all LLM backends |
-| SQLite over PostgreSQL | Portable, zero-config, researcher-friendly |
-| CLI first, UI second | Easier to test, debug, and cite in methods sections |
-| MeSH over keyword-only | NLM ontology is authoritative; keywords are approximate |
-| Separate trials table | Articles and trials have different schemas; join later |
-| Disclaimer in all outputs | Scientific honesty; prevents misuse as systematic review |
+1. **Provider-agnostic** — no LLM required for core functionality
+2. **Modular** — each layer independently useful and testable
+3. **Extensible** — new backends registered in one place
+4. **Reproducible** — all outputs include filters, timestamps, provenance
+5. **Honest** — limitations stated explicitly in every output
+6. **Backward compatible** — new versions never break existing functionality
 
 ---
 
 *NeuroLit Miner · https://github.com/DrMoumenAI/neurolit-miner*  
-*Author: Assia Moumen M.D., MEng*
+*Author: Assia M. Moumen, M.D., MEng*
